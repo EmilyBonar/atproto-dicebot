@@ -1,31 +1,32 @@
 # dicebot (bot) living on Bluesky
 
-[@dicebot.bsky.social](https://staging.bsky.app/profile/dicebot.bsky.social).
+[@dice.fauxtrots.com](https://bsky.app/profile/dice.fauxtrots.com)
 
 ## Usage
 
-### show your DID
+### roll dice
 
 ```text
-@dicebot.bsky.social did
+@dice.fauxtrots.com 1d6
 ```
 
-Bot responses your [DID](https://atproto.com/guides/identity).
+Bot responds with a random value.
 
 ```text
-Hi, @EmilyBonar.bsky.social ! your DID is "did:plc:wh4o4bn5ppuxn7saotd2xqzm"
+1d6: 5
 ```
 
-### show when your account was created (indexed)
+### roll multiple dice
 
 ```text
-@dicebot.bsky.social birthday
+@dice.fauxtrots.com 2d6 1d12
 ```
 
-Bot responses when your account was created (indexed) at.
+Bot responds with a multiple random values.
 
 ```text
-your indexedAt is 2023-04-07 12:48:35 (UTC) / 2023-04-07 21:48:35 (JST)
+2d6: 4 3 = 7
+1d12: 12
 ```
 
 ## How does it work?
@@ -58,9 +59,3 @@ sequenceDiagram
             Cloud Run --> Cloud Scheduler: 200 OK
         deactivate Cloud Run
 ```
-
-### Why not use stream?
-
-[see this](https://cloud.google.com/products/calculator/#id=7eae8fe9-3e43-48cc-b0c0-17b9f5b34c91)
-
-> Total Estimated Cost: USD 44.71 per 1 month
