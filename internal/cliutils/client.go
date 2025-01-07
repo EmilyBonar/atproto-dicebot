@@ -7,10 +7,10 @@ import (
 	"os"
 	"time"
 
+	"github.com/EmilyBonar/atproto-dicebot/internal/slogtypes"
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
 	"github.com/bluesky-social/indigo/xrpc"
 	"github.com/lestrrat-go/jwx/v2/jwt"
-	"github.com/vvakame/atproto-vvvot/internal/slogtypes"
 	"golang.org/x/exp/slog"
 )
 

@@ -1,14 +1,15 @@
-package vvvot
+package dicebot
 
 import (
 	"context"
+	"math/rand"
 	"strings"
 
 	"github.com/bluesky-social/indigo/api/bsky"
 	"github.com/bluesky-social/indigo/xrpc"
 )
 
-func isMentionedToMe(ctx context.Context, me *xrpc.AuthInfo, post *bsky.FeedPost) bool {
+func isMentionedToMe(_ context.Context, me *xrpc.AuthInfo, post *bsky.FeedPost) bool {
 	if me.Did != "" {
 		for _, facet := range post.Facets {
 			for _, f := range facet.Features {
@@ -29,7 +30,7 @@ func isMentionedToMe(ctx context.Context, me *xrpc.AuthInfo, post *bsky.FeedPost
 	return false
 }
 
-func isRepliedAlready(ctx context.Context, me *xrpc.AuthInfo, thread *bsky.FeedGetPostThread_Output) bool {
+func isRepliedAlready(_ context.Context, me *xrpc.AuthInfo, thread *bsky.FeedGetPostThread_Output) bool {
 	if thread.Thread == nil {
 		return false
 	}
@@ -46,4 +47,29 @@ func isRepliedAlready(ctx context.Context, me *xrpc.AuthInfo, thread *bsky.FeedG
 	}
 
 	return false
+}
+
+type Dice struct {
+	number int
+	sides  int
+}
+
+func rollDice(dice Dice) []int {
+	var results []int
+	for i := 0; i < dice.number; i++ {
+		results = append(results, rollDie(dice.sides))
+	}
+	return results
+}
+
+func rollDie(sides int) int {
+	return rand.Intn(sides) + 1
+}
+
+func sum(nums []int) int {
+	result := 0
+	for _, num := range nums {
+		result += num
+	}
+	return result
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -10,11 +11,11 @@ import (
 	"time"
 
 	"cloud.google.com/go/compute/metadata"
+	"github.com/EmilyBonar/atproto-dicebot/httpapi"
+	"github.com/EmilyBonar/atproto-dicebot/internal/cliutils"
 	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 	gcppropagator "github.com/GoogleCloudPlatform/opentelemetry-operations-go/propagator"
 	"github.com/bluesky-social/indigo/xrpc"
-	"github.com/vvakame/atproto-vvvot/httpapi"
-	"github.com/vvakame/atproto-vvvot/internal/cliutils"
 	"github.com/vvakame/sdlog/gcpslog"
 	octrace "go.opencensus.io/trace"
 	"go.opentelemetry.io/contrib/detectors/gcp"
@@ -26,7 +27,6 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"go.opentelemetry.io/otel/trace"
-	"golang.org/x/exp/slog"
 )
 
 func main() {
@@ -66,7 +66,7 @@ func main() {
 			resource.WithDetectors(gcp.NewDetector()),
 			resource.WithTelemetrySDK(),
 			resource.WithAttributes(
-				semconv.ServiceNameKey.String("vvvot"),
+				semconv.ServiceNameKey.String("dicebot"),
 			),
 		)
 		if err != nil {

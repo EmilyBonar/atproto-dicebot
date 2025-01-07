@@ -1,25 +1,25 @@
-# vvvot (bot) living on Bluesky
+# dicebot (bot) living on Bluesky
 
-[@vvvot.bsky.social](https://staging.bsky.app/profile/vvvot.bsky.social).
+[@dicebot.bsky.social](https://staging.bsky.app/profile/dicebot.bsky.social).
 
 ## Usage
 
 ### show your DID
 
 ```text
-@vvvot.bsky.social did
+@dicebot.bsky.social did
 ```
 
 Bot responses your [DID](https://atproto.com/guides/identity).
 
 ```text
-Hi, @vvakame.bsky.social ! your DID is "did:plc:wh4o4bn5ppuxn7saotd2xqzm"
+Hi, @EmilyBonar.bsky.social ! your DID is "did:plc:wh4o4bn5ppuxn7saotd2xqzm"
 ```
 
-### show when your account was created (indexed) 
+### show when your account was created (indexed)
 
 ```text
-@vvvot.bsky.social birthday
+@dicebot.bsky.social birthday
 ```
 
 Bot responses when your account was created (indexed) at.
@@ -37,7 +37,7 @@ sequenceDiagram
     participant Cloud Scheduler
     participant Cloud Run
     participant Bluesky
-    
+
     Cloud Scheduler ->> Cloud Run: kick every 5min
         activate Cloud Run
             Cloud Run ->> Bluesky: app.bsky.notification.listNotifications

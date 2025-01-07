@@ -1,4 +1,4 @@
-package vvvot
+package dicebot
 
 import (
 	"context"
@@ -16,7 +16,7 @@ type Response interface {
 }
 
 func ProcessNotifications(ctx context.Context, xrpcc *xrpc.Client) (_ []Response, err error) {
-	ctx, span := otel.Tracer("vvvot").Start(ctx, "ProcessNotifications")
+	ctx, span := otel.Tracer("dicebot").Start(ctx, "ProcessNotifications")
 	defer func() {
 		if err != nil {
 			span.RecordError(err)
@@ -77,18 +77,10 @@ OUTER:
 					slog.DebugCtx(ctx, "found newest replied post", "cid", nf.Cid)
 					break OUTER
 				}
-
+				dicePool := parseDice(ctx, xrpcc.Auth, v)
 				switch {
-				case isReplyDIDRequest(ctx, xrpcc.Auth, v):
-					resp, err := replyDID(ctx, xrpcc, nf)
-					if err != nil {
-						return nil, err
-					}
-
-					respList = append(respList, resp)
-
-				case isReplyAccountCreatedAtRequest(ctx, xrpcc.Auth, v):
-					resp, err := replyAccountCreatedAt(ctx, xrpcc, nf)
+				case len(dicePool) > 0:
+					resp, err := replyDice(ctx, xrpcc, nf, dicePool)
 					if err != nil {
 						return nil, err
 					}

@@ -51,5 +51,5 @@ update_traffic_cloud_run()
 }
 
 project_common_args=("--no-traffic" "--max-instances=1")
-deploy_cloud_run "server" "--allow-unauthenticated" "--cpu=1" "--memory=512Mi" "--concurrency=40" "--execution-environment=gen2" "--labels=app=vvvot" "${project_common_args[@]}"
+deploy_cloud_run "server" "--allow-unauthenticated" "--cpu=1" "--memory=512Mi" "--concurrency=40" "--execution-environment=gen2" "--labels=app=dicebot" "${project_common_args[@]}"
 update_traffic_cloud_run "server"

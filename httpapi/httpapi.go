@@ -5,9 +5,9 @@ import (
 	"errors"
 	"net/http"
 
+	dicebot "github.com/EmilyBonar/atproto-dicebot"
+	"github.com/EmilyBonar/atproto-dicebot/internal/cliutils"
 	"github.com/bluesky-social/indigo/xrpc"
-	vvvot "github.com/vvakame/atproto-vvvot"
-	"github.com/vvakame/atproto-vvvot/internal/cliutils"
 	"golang.org/x/exp/slog"
 )
 
@@ -44,7 +44,7 @@ func (h *Handler) Serve(mux *http.ServeMux) {
 }
 
 func (h *Handler) ProcessNotifications(ctx context.Context) error {
-	respList, err := vvvot.ProcessNotifications(ctx, h.xrpcc)
+	respList, err := dicebot.ProcessNotifications(ctx, h.xrpcc)
 	if err != nil {
 		return err
 	}
