@@ -1,10 +1,9 @@
 package dicebot
 
 import (
+	"atproto-dicebot/utils"
 	"context"
 	"fmt"
-	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
@@ -24,35 +23,7 @@ type ResponseReplyDice struct {
 
 func (reply *ResponseReplyDice) isResponse() {}
 
-func parseDice(_ context.Context, me *xrpc.AuthInfo, feedPost *bsky.FeedPost) []Dice {
-	s := feedPost.Text
-	s = strings.TrimSpace(s)
-	s = strings.TrimPrefix(s, "@"+me.Handle)
-	s = strings.TrimSpace(s)
-
-	var diceMatcher = regexp.MustCompile(`(\d*)d(\d+)`)
-	diceStrs := diceMatcher.FindAllString(s, -1)
-
-	var dicePool []Dice
-	for _, diceStr := range diceStrs {
-		captureGroups := diceMatcher.FindStringSubmatch(diceStr)
-		if len(captureGroups) == 2 {
-			sides, _ := strconv.Atoi(captureGroups[1])
-
-			dicePool = append(dicePool, Dice{number: 1, sides: sides})
-		} else if len(captureGroups) == 3 {
-			number, _ := strconv.Atoi(captureGroups[1])
-			sides, _ := strconv.Atoi(captureGroups[2])
-
-			dicePool = append(dicePool, Dice{number: number, sides: sides})
-
-		}
-	}
-
-	return dicePool
-}
-
-func replyDice(ctx context.Context, xrpcc *xrpc.Client, nf *bsky.NotificationListNotifications_Notification, dicePool []Dice) (_ Response, err error) {
+func replyDice(ctx context.Context, xrpcc *xrpc.Client, nf *bsky.NotificationListNotifications_Notification, dicePool []utils.Dice) (_ Response, err error) {
 	ctx, span := otel.Tracer("dicebot").Start(ctx, "replyDice")
 	defer func() {
 		if err != nil {
@@ -64,12 +35,12 @@ func replyDice(ctx context.Context, xrpcc *xrpc.Client, nf *bsky.NotificationLis
 	responseText := ""
 
 	for _, dice := range dicePool {
-		diceRoll := rollDice(dice)
+		diceRoll := utils.RollDice(dice)
 		rollString := strings.Trim(fmt.Sprint(diceRoll), "[]")
 		if len(diceRoll) == 1 {
-			responseText += fmt.Sprintf("%dd%d: %v\n", dice.number, dice.sides, rollString)
+			responseText += fmt.Sprintf("%dd%d: %v\n", dice.Number, dice.Sides, rollString)
 		} else {
-			responseText += fmt.Sprintf("%dd%d: %v = %d\n", dice.number, dice.sides, rollString, sum(diceRoll))
+			responseText += fmt.Sprintf("%dd%d: %v = %d\n", dice.Number, dice.Sides, rollString, utils.Sum(diceRoll))
 		}
 	}
 

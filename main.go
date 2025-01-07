@@ -1,12 +1,14 @@
 package main
 
 import (
+	dicebot "atproto-dicebot/src"
+	"atproto-dicebot/utils"
+
 	"context"
 	"os"
 
-	dicebot "github.com/EmilyBonar/atproto-dicebot"
-	"github.com/EmilyBonar/atproto-dicebot/internal/cliutils"
 	cliutil "github.com/bluesky-social/indigo/cmd/gosky/util"
+
 	"github.com/bluesky-social/indigo/xrpc"
 	"github.com/k0kubun/pp/v3"
 	"golang.org/x/exp/slog"
@@ -22,26 +24,25 @@ func main() {
 		Host:   "https://bsky.social",
 	}
 
-	auth, err := cliutils.LoadAuthInfo(ctx, xrpcc)
+	auth, err := utils.LoadAuthInfo(ctx, xrpcc)
 	if err != nil {
 		slog.Error("error on cliutils.LoadAuthInfo", "error", err)
 		panic(err)
 	}
 	xrpcc.Auth = auth
 
-	err = cliutils.CheckTokenExpired(ctx, xrpcc)
+	err = utils.CheckTokenExpired(ctx, xrpcc)
 	if err != nil {
 		slog.Error("error on cliutils.CheckTokenExpired", "error", err)
 		panic(err)
 	}
 
 	defer func() {
-		err := cliutils.DeleteSession(ctx, xrpcc)
+		err := utils.DeleteSession(ctx, xrpcc)
 		if err != nil {
 			slog.Error("error raised by com.atproto.server.deleteSession", "error", err)
 		}
 	}()
-
 	respList, err := dicebot.ProcessNotifications(ctx, xrpcc)
 	if err != nil {
 		slog.Error("error on dicebot.ProcessNotifications", "error", err)

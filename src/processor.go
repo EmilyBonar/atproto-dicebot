@@ -1,6 +1,7 @@
 package dicebot
 
 import (
+	"atproto-dicebot/utils"
 	"context"
 	"fmt"
 	"time"
@@ -62,7 +63,7 @@ OUTER:
 			case *bsky.FeedPost:
 				slog.DebugCtx(ctx, "feed post", "author", nf.Author.Did, "text", v.Text)
 
-				if !isMentionedToMe(ctx, xrpcc.Auth, v) {
+				if !utils.DoesMentionMe(ctx, xrpcc.Auth, v) {
 					slog.DebugCtx(ctx, "this post doesn't mentioned to me")
 					continue
 				}
@@ -73,11 +74,11 @@ OUTER:
 					return nil, err
 				}
 
-				if isRepliedAlready(ctx, xrpcc.Auth, threadResp) {
+				if utils.HasAlreadyReplied(ctx, xrpcc.Auth, threadResp) {
 					slog.DebugCtx(ctx, "found newest replied post", "cid", nf.Cid)
 					break OUTER
 				}
-				dicePool := parseDice(ctx, xrpcc.Auth, v)
+				dicePool := utils.ParseDice(ctx, xrpcc.Auth, v)
 				switch {
 				case len(dicePool) > 0:
 					resp, err := replyDice(ctx, xrpcc, nf, dicePool)

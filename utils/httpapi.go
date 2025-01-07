@@ -1,13 +1,14 @@
-package cliutils
+package utils
 
 import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"time"
 
-	"github.com/EmilyBonar/atproto-dicebot/internal/slogtypes"
+	dicebot "github.com/EmilyBonar/atproto-dicebot"
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
 	"github.com/bluesky-social/indigo/xrpc"
 	"github.com/lestrrat-go/jwx/v2/jwt"
@@ -18,15 +19,15 @@ func getHandle() string {
 	return os.Getenv("ATPROTO_BOT_HANDLE")
 }
 
-func getPassword() slogtypes.Password {
-	return slogtypes.Password(os.Getenv("ATPROTO_BOT_PASSWORD"))
+func getPassword() string {
+	return os.Getenv("ATPROTO_BOT_PASSWORD")
 }
 
 func LoadAuthInfo(ctx context.Context, xrpcc *xrpc.Client) (*xrpc.AuthInfo, error) {
 	handle := getHandle()
 	password := getPassword()
 
-	slog.DebugCtx(ctx, "create session", "handle", handle, "password", password)
+	slog.DebugCtx(ctx, "create session", "handle", handle)
 
 	auth, err := comatproto.ServerCreateSession(ctx, xrpcc, &comatproto.ServerCreateSession_Input{
 		Identifier: handle,
@@ -107,6 +108,49 @@ func CheckTokenExpired(ctx context.Context, xrpcc *xrpc.Client) error {
 			Did:        resp.Did,
 		}
 	}
+
+	return nil
+}
+
+func New(xrpcc *xrpc.Client) (*Handler, error) {
+	if xrpcc.Auth == nil {
+		return nil, errors.New("xrpc client doesn't have auth info")
+	}
+
+	return &Handler{xrpcc: xrpcc}, nil
+}
+
+type Handler struct {
+	xrpcc *xrpc.Client
+}
+
+func (h *Handler) Serve(mux *http.ServeMux) {
+	mux.HandleFunc("/api/processNotifications", func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		err := CheckTokenExpired(ctx, h.xrpcc)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			slog.ErrorCtx(ctx, "error on cliutils.CheckTokenExpired", "error", err)
+			return
+		}
+
+		err = h.ProcessNotifications(ctx)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			slog.ErrorCtx(ctx, "failed to process notifications", "error", err)
+			return
+		}
+	})
+}
+
+func (h *Handler) ProcessNotifications(ctx context.Context) error {
+	respList, err := dicebot.ProcessNotifications(ctx, h.xrpcc)
+	if err != nil {
+		return err
+	}
+
+	slog.InfoCtx(ctx, "processed message", "count", len(respList))
 
 	return nil
 }
