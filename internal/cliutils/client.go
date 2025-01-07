@@ -110,3 +110,17 @@ func CheckTokenExpired(ctx context.Context, xrpcc *xrpc.Client) error {
 
 	return nil
 }
+
+func DeleteSession(ctx context.Context, xrpcc *xrpc.Client) error {
+	slog.DebugCtx(ctx, "delete xrpc server session")
+
+	err := CheckTokenExpired(ctx, xrpcc)
+
+	if err != nil {
+		slog.Error("error on cliutils.CheckTokenExpired", "error", err)
+		panic(err)
+	}
+
+	err = comatproto.ServerDeleteSession(ctx, xrpcc)
+	return err
+}

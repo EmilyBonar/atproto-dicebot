@@ -16,14 +16,6 @@ import (
 	"golang.org/x/exp/slog"
 )
 
-type ResponseReplyDID struct {
-	Base   *bsky.NotificationListNotifications_Notification
-	Input  *comatproto.RepoCreateRecord_Input
-	Output *comatproto.RepoCreateRecord_Output
-}
-
-func (reply *ResponseReplyDID) isResponse() {}
-
 type ResponseReplyDice struct {
 	Base   *bsky.NotificationListNotifications_Notification
 	Input  *comatproto.RepoCreateRecord_Input
@@ -110,7 +102,7 @@ func replyDice(ctx context.Context, xrpcc *xrpc.Client, nf *bsky.NotificationLis
 
 	slog.InfoCtx(ctx, "message posted", "uri", output.Uri, "cid", output.Cid)
 
-	resp := &ResponseReplyDID{
+	resp := &ResponseReplyDice{
 		Base:   nf,
 		Input:  input,
 		Output: output,
