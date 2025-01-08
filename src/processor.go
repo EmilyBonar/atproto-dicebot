@@ -27,7 +27,7 @@ func ProcessNotifications(ctx context.Context, xrpcc *xrpc.Client) (_ []Response
 
 	now := time.Now()
 
-	unreadResp, err := bsky.NotificationGetUnreadCount(ctx, xrpcc)
+	unreadResp, err := bsky.NotificationGetUnreadCount(ctx, xrpcc, false, now.String())
 	if err != nil {
 		slog.ErrorCtx(ctx, "error raised by app.bsky.notification.getUnreadCount", "error", err)
 		return nil, err
@@ -40,7 +40,7 @@ func ProcessNotifications(ctx context.Context, xrpcc *xrpc.Client) (_ []Response
 	var cursor string
 OUTER:
 	for {
-		resp, err := bsky.NotificationListNotifications(ctx, xrpcc, cursor, limit)
+		resp, err := bsky.NotificationListNotifications(ctx, xrpcc, cursor, limit, false, now.String())
 		if err != nil {
 			slog.ErrorCtx(ctx, "error raised by app.bsky.notification.listNotifications", "error", err)
 			return nil, err
@@ -68,7 +68,7 @@ OUTER:
 					continue
 				}
 
-				threadResp, err := bsky.FeedGetPostThread(ctx, xrpcc, 10, nf.Uri)
+				threadResp, err := bsky.FeedGetPostThread(ctx, xrpcc, 10, 10, nf.Uri)
 				if err != nil {
 					slog.Error("error raised by app.bsky.feed.getPostThread", "error", err)
 					return nil, err
@@ -78,18 +78,16 @@ OUTER:
 					slog.DebugCtx(ctx, "found newest replied post", "cid", nf.Cid)
 					break OUTER
 				}
-				dicePool := utils.ParseDice(ctx, xrpcc.Auth, v)
-				switch {
-				case len(dicePool) > 0:
+
+				if dicePool := utils.ParseDice(ctx, xrpcc.Auth, v); len(dicePool) > 0 {
 					resp, err := replyDice(ctx, xrpcc, nf, dicePool)
 					if err != nil {
 						return nil, err
 					}
 
 					respList = append(respList, resp)
-
-				default:
-					slog.DebugCtx(ctx, "nothing to find keyword", "text", v.Text)
+				} else {
+					slog.DebugCtx(ctx, "no dice requests found", "text", v.Text)
 				}
 
 			case *bsky.FeedRepost:

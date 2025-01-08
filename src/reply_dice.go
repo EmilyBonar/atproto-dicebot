@@ -44,6 +44,11 @@ func replyDice(ctx context.Context, xrpcc *xrpc.Client, nf *bsky.NotificationLis
 		}
 	}
 
+	reply := utils.GetReplyRefs(ctx, xrpcc, comatproto.RepoStrongRef{
+		Cid: nf.Cid,
+		Uri: nf.Uri,
+	})
+
 	input := &comatproto.RepoCreateRecord_Input{
 		Collection: "app.bsky.feed.post",
 		Repo:       xrpcc.Auth.Did,
@@ -51,16 +56,7 @@ func replyDice(ctx context.Context, xrpcc *xrpc.Client, nf *bsky.NotificationLis
 			Val: &bsky.FeedPost{
 				Text:      responseText,
 				CreatedAt: time.Now().Local().Format(time.RFC3339),
-				Reply: &bsky.FeedPost_ReplyRef{
-					Parent: &comatproto.RepoStrongRef{
-						Cid: nf.Cid,
-						Uri: nf.Uri,
-					},
-					Root: &comatproto.RepoStrongRef{
-						Cid: nf.Cid,
-						Uri: nf.Uri,
-					},
-				},
+				Reply:     &reply,
 			},
 		},
 	}

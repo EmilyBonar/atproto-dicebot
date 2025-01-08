@@ -7,7 +7,7 @@ import (
 	"context"
 	"os"
 
-	cliutil "github.com/bluesky-social/indigo/cmd/gosky/util"
+	cliutil "github.com/bluesky-social/indigo/util/cliutil"
 
 	"github.com/bluesky-social/indigo/xrpc"
 	"github.com/k0kubun/pp/v3"
