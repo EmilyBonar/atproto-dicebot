@@ -3,7 +3,6 @@ module atproto-dicebot
 go 1.23
 
 require (
-	github.com/EmilyBonar/atproto-dicebot v0.0.0-20250107213213-517568ddd750
 	github.com/bluesky-social/indigo v0.0.0-20250107182050-ad3c38b9139c
 	github.com/k0kubun/pp/v3 v3.2.0
 	github.com/lestrrat-go/jwx/v2 v2.0.12

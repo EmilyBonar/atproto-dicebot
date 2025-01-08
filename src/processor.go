@@ -27,7 +27,7 @@ func ProcessNotifications(ctx context.Context, xrpcc *xrpc.Client) (_ []Response
 
 	now := time.Now()
 
-	unreadResp, err := bsky.NotificationGetUnreadCount(ctx, xrpcc, false, now.String())
+	unreadResp, err := bsky.NotificationGetUnreadCount(ctx, xrpcc, false, "")
 	if err != nil {
 		slog.ErrorCtx(ctx, "error raised by app.bsky.notification.getUnreadCount", "error", err)
 		return nil, err
@@ -40,7 +40,7 @@ func ProcessNotifications(ctx context.Context, xrpcc *xrpc.Client) (_ []Response
 	var cursor string
 OUTER:
 	for {
-		resp, err := bsky.NotificationListNotifications(ctx, xrpcc, cursor, limit, false, now.String())
+		resp, err := bsky.NotificationListNotifications(ctx, xrpcc, cursor, limit, false, "")
 		if err != nil {
 			slog.ErrorCtx(ctx, "error raised by app.bsky.notification.listNotifications", "error", err)
 			return nil, err
@@ -63,10 +63,11 @@ OUTER:
 			case *bsky.FeedPost:
 				slog.DebugCtx(ctx, "feed post", "author", nf.Author.Did, "text", v.Text)
 
-				if !utils.DoesMentionMe(ctx, xrpcc.Auth, v) {
-					slog.DebugCtx(ctx, "this post doesn't mentioned to me")
-					continue
-				}
+				// Commenting out so that replies that don't explicitly mention still get answers
+				// if !utils.DoesMentionMe(ctx, xrpcc.Auth, v) {
+				// 	slog.DebugCtx(ctx, "this post doesn't mention me")
+				// 	continue
+				// }
 
 				threadResp, err := bsky.FeedGetPostThread(ctx, xrpcc, 10, 10, nf.Uri)
 				if err != nil {

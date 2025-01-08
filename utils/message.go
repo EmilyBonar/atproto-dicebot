@@ -61,16 +61,17 @@ func GetReplyRefs(ctx context.Context, xrpcc *xrpc.Client, parent comatproto.Rep
 		slog.Error("error on parsing uri", "error", err)
 		panic(err)
 	}
-	resp, err := comagnos.RepoGetRecord(ctx, xrpcc, parent.Cid, "app.bsky.feed.post", xrpcc.Auth.Did, parsedUri.Rkey)
+
+	resp, err := comagnos.RepoGetRecord(ctx, xrpcc, parent.Cid, "app.bsky.feed.post", parsedUri.Did, parsedUri.Rkey)
 	if err != nil {
 		slog.Error("error on getting parent record", "error", err)
 		panic(err)
 	}
 
 	var parentRecord struct {
-		reply *bsky.FeedPost_ReplyRef
+		Reply *bsky.FeedPost_ReplyRef
 	}
-	err = json.Unmarshal(*resp.Value, parentRecord)
+	err = json.Unmarshal(*resp.Value, &parentRecord)
 	if err != nil {
 		slog.Error("error on unmarshalling parent record", "error", err)
 		panic(err)
@@ -78,7 +79,7 @@ func GetReplyRefs(ctx context.Context, xrpcc *xrpc.Client, parent comatproto.Rep
 
 	var root comatproto.RepoStrongRef
 
-	parentReply := parentRecord.reply
+	parentReply := parentRecord.Reply
 	if parentReply != nil {
 		root = *parentReply.Root
 	} else {
