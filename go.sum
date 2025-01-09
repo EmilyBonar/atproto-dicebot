@@ -1,6 +1,4 @@
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/EmilyBonar/atproto-dicebot v0.0.0-20250107213213-517568ddd750 h1:OVK+s0VSl91HLwCL3V0sPkmGsT8EKiMfsPTHil5vOIE=
-github.com/EmilyBonar/atproto-dicebot v0.0.0-20250107213213-517568ddd750/go.mod h1:B5ruX0IRiWJVglemCSTtQNj3OPnnh7i9O3COCT9m+mo=
 github.com/benbjohnson/clock v1.1.0/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
 github.com/beorn7/perks v1.0.1/go.mod h1:G2ZrVWU2WbWT9wwq4/hrbKbnv/1ERSJQ0ibhJ6rlkpw=

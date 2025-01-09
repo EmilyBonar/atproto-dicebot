@@ -5,7 +5,6 @@ import (
 	"math/rand"
 	"regexp"
 	"strconv"
-	"strings"
 
 	"github.com/bluesky-social/indigo/api/bsky"
 	"github.com/bluesky-social/indigo/xrpc"
@@ -18,10 +17,6 @@ type Dice struct {
 
 func ParseDice(_ context.Context, me *xrpc.AuthInfo, feedPost *bsky.FeedPost) []Dice {
 	s := feedPost.Text
-	s = strings.TrimSpace(s)
-	s = strings.TrimPrefix(s, "@"+me.Handle)
-	s = strings.TrimSpace(s)
-
 	var diceMatcher = regexp.MustCompile(`(\d*)d(\d+)`)
 	diceStrs := diceMatcher.FindAllString(s, -1)
 

@@ -31,18 +31,12 @@ func main() {
 	}
 	xrpcc.Auth = auth
 
-	err = utils.CheckTokenExpired(ctx, xrpcc)
-	if err != nil {
-		slog.Error("error on cliutils.CheckTokenExpired", "error", err)
-		panic(err)
-	}
+	// err = utils.CheckTokenExpired(ctx, xrpcc)
+	// if err != nil {
+	// 	slog.Error("error on cliutils.CheckTokenExpired", "error", err)
+	// 	panic(err)
+	// }
 
-	defer func() {
-		err := utils.DeleteSession(ctx, xrpcc)
-		if err != nil {
-			slog.Error("error raised by com.atproto.server.deleteSession", "error", err)
-		}
-	}()
 	respList, err := dicebot.ProcessNotifications(ctx, xrpcc)
 	if err != nil {
 		slog.Error("error on dicebot.ProcessNotifications", "error", err)

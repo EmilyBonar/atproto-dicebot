@@ -5,7 +5,6 @@ go 1.23
 require (
 	github.com/bluesky-social/indigo v0.0.0-20250107182050-ad3c38b9139c
 	github.com/k0kubun/pp/v3 v3.2.0
-	github.com/lestrrat-go/jwx/v2 v2.0.12
 	go.opentelemetry.io/otel v1.21.0
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa
 )
@@ -51,6 +50,7 @@ require (
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
 	github.com/lestrrat-go/httprc v1.0.4 // indirect
 	github.com/lestrrat-go/iter v1.0.2 // indirect
+	github.com/lestrrat-go/jwx/v2 v2.0.12 // indirect
 	github.com/lestrrat-go/option v1.0.1 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
