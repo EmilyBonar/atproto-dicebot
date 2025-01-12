@@ -4,11 +4,26 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"runtime"
 
 	comatproto "github.com/bluesky-social/indigo/api/atproto"
 	"github.com/bluesky-social/indigo/xrpc"
 	"golang.org/x/exp/slog"
 )
+
+func logError(ctx context.Context, errIn error) (err error) {
+	if errIn != nil {
+		pc, _, _, ok := runtime.Caller(1)
+		details := runtime.FuncForPC(pc)
+		var callingFunc string
+		if ok && details != nil {
+			callingFunc = fmt.Sprintf("called from %s", details.Name())
+		}
+		slog.ErrorContext(ctx, "error ", callingFunc, "msg: ", errIn)
+		return fmt.Errorf("error %v msg: %v", callingFunc, errIn)
+	}
+	return nil
+}
 
 func getHandle() string {
 	return os.Getenv("ATPROTO_BOT_HANDLE")
@@ -19,21 +34,42 @@ func getPassword() string {
 }
 
 func LoadAuthInfo(ctx context.Context, xrpcc *xrpc.Client) (*xrpc.AuthInfo, error) {
-	auth, err := refreshAuthSession(ctx, xrpcc)
+	auth, err := getAuthSession(ctx, xrpcc)
+	logError(ctx, err)
 
-	if err != nil {
+	if auth == nil {
+		auth, err = refreshAuthSession(ctx, xrpcc)
+		logError(ctx, err)
+	}
+
+	if auth == nil {
 		auth, err = createAuthSession(ctx, xrpcc)
+		logError(ctx, err)
 	}
 
 	return auth, err
 }
 
+func getAuthSession(ctx context.Context, xrpcc *xrpc.Client) (*xrpc.AuthInfo, error) {
+	slog.DebugContext(ctx, "getting session")
+	auth, err := comatproto.ServerGetSession(ctx, xrpcc)
+
+	if err != nil {
+		return nil, logError(ctx, fmt.Errorf("failed to get session: %w", err))
+	}
+
+	return &xrpc.AuthInfo{
+		Did:    auth.Did,
+		Handle: auth.Handle,
+	}, nil
+}
+
 func refreshAuthSession(ctx context.Context, xrpcc *xrpc.Client) (*xrpc.AuthInfo, error) {
-	slog.DebugCtx(ctx, "refreshing session")
+	slog.DebugContext(ctx, "refreshing session")
 	auth, err := comatproto.ServerRefreshSession(ctx, xrpcc)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to refresh session: %w", err)
+		return nil, logError(ctx, fmt.Errorf("failed to refresh session: %w", err))
 	}
 
 	return &xrpc.AuthInfo{
@@ -55,7 +91,7 @@ func createAuthSession(ctx context.Context, xrpcc *xrpc.Client) (*xrpc.AuthInfo,
 	})
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to create session: %w", err)
+		return nil, logError(ctx, fmt.Errorf("failed to create session: %w", err))
 	}
 
 	return &xrpc.AuthInfo{
@@ -67,10 +103,10 @@ func createAuthSession(ctx context.Context, xrpcc *xrpc.Client) (*xrpc.AuthInfo,
 }
 
 // func CheckTokenExpired(ctx context.Context, xrpcc *xrpc.Client) error {
-// 	slog.DebugCtx(ctx, "check xrpc auth token status")
+// 	slog.DebugContext(ctx, "check xrpc auth token status")
 
 // 	if xrpcc.Auth == nil {
-// 		slog.InfoCtx(ctx, "create new session by password")
+// 		slog.InfoContext(ctx, "create new session by password")
 // 		auth, err := LoadAuthInfo(ctx, xrpcc)
 // 		if err != nil {
 // 			return err
@@ -87,7 +123,7 @@ func createAuthSession(ctx context.Context, xrpcc *xrpc.Client) (*xrpc.AuthInfo,
 // 		}
 
 // 		if errors.Is(err, jwt.ErrTokenExpired()) || token.Expiration().Before(now) {
-// 			slog.DebugCtx(ctx, "accessJwt expired")
+// 			slog.DebugContext(ctx, "accessJwt expired")
 // 			xrpcc.Auth.AccessJwt = ""
 // 		}
 // 	}
@@ -98,13 +134,13 @@ func createAuthSession(ctx context.Context, xrpcc *xrpc.Client) (*xrpc.AuthInfo,
 // 		}
 
 // 		if errors.Is(err, jwt.ErrTokenExpired()) || token.Expiration().Before(now) {
-// 			slog.DebugCtx(ctx, "refreshJwt expired")
+// 			slog.DebugContext(ctx, "refreshJwt expired")
 // 			xrpcc.Auth.RefreshJwt = ""
 // 		}
 // 	}
 
 // 	if xrpcc.Auth.AccessJwt == "" && xrpcc.Auth.RefreshJwt == "" {
-// 		slog.InfoCtx(ctx, "create new session from scratch")
+// 		slog.InfoContext(ctx, "create new session from scratch")
 // 		xrpcc.Auth = nil
 // 		auth, err := LoadAuthInfo(ctx, xrpcc)
 // 		if err != nil {
@@ -113,7 +149,7 @@ func createAuthSession(ctx context.Context, xrpcc *xrpc.Client) (*xrpc.AuthInfo,
 // 		xrpcc.Auth = auth
 
 // 	} else if xrpcc.Auth.AccessJwt == "" {
-// 		slog.InfoCtx(ctx, "refresh session by refreshJwt")
+// 		slog.InfoContext(ctx, "refresh session by refreshJwt")
 // 		xrpcc.Auth.AccessJwt = xrpcc.Auth.RefreshJwt
 // 		xrpcc.Auth.RefreshJwt = ""
 

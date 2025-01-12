@@ -67,7 +67,7 @@ func replyDice(ctx context.Context, xrpcc *xrpc.Client, nf *bsky.NotificationLis
 		return nil, err
 	}
 
-	slog.InfoCtx(ctx, "message posted", "uri", output.Uri, "cid", output.Cid)
+	slog.InfoContext(ctx, "message posted", "uri", output.Uri, "cid", output.Cid)
 
 	resp := &ResponseReplyDice{
 		Base:   nf,

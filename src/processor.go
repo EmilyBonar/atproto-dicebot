@@ -29,11 +29,11 @@ func ProcessNotifications(ctx context.Context, xrpcc *xrpc.Client) (_ []Response
 
 	unreadResp, err := bsky.NotificationGetUnreadCount(ctx, xrpcc, false, "")
 	if err != nil {
-		slog.ErrorCtx(ctx, "error raised by app.bsky.notification.getUnreadCount", "error", err)
+		slog.ErrorContext(ctx, "error raised by app.bsky.notification.getUnreadCount", "error", err)
 		return nil, err
 	}
 
-	slog.DebugCtx(ctx, "check unread count", "count", unreadResp.Count)
+	slog.DebugContext(ctx, "check unread count", "count", unreadResp.Count)
 
 	respList := make([]Response, 0)
 	limit := int64(20)
@@ -42,14 +42,14 @@ OUTER:
 	for {
 		resp, err := bsky.NotificationListNotifications(ctx, xrpcc, cursor, limit, false, "")
 		if err != nil {
-			slog.ErrorCtx(ctx, "error raised by app.bsky.notification.listNotifications", "error", err)
+			slog.ErrorContext(ctx, "error raised by app.bsky.notification.listNotifications", "error", err)
 			return nil, err
 		}
 
-		slog.DebugCtx(ctx, "response about app.bsky.notification.listNotifications", "cursor", resp.Cursor, "length", len(resp.Notifications))
+		slog.DebugContext(ctx, "response about app.bsky.notification.listNotifications", "cursor", resp.Cursor, "length", len(resp.Notifications))
 
 		for idx, nf := range resp.Notifications {
-			slog.DebugCtx(
+			slog.DebugContext(
 				ctx,
 				"notification",
 				"index", idx,
@@ -61,11 +61,11 @@ OUTER:
 
 			switch v := nf.Record.Val.(type) {
 			case *bsky.FeedPost:
-				slog.DebugCtx(ctx, "feed post", "author", nf.Author.Did, "text", v.Text)
+				slog.DebugContext(ctx, "feed post", "author", nf.Author.Did, "text", v.Text)
 
 				// Commenting out so that replies that don't explicitly mention still get answers
 				// if !utils.DoesMentionMe(ctx, xrpcc.Auth, v) {
-				// 	slog.DebugCtx(ctx, "this post doesn't mention me")
+				// 	slog.DebugContext(ctx, "this post doesn't mention me")
 				// 	continue
 				// }
 
@@ -76,7 +76,7 @@ OUTER:
 				}
 
 				if utils.HasAlreadyReplied(ctx, xrpcc.Auth, threadResp) {
-					slog.DebugCtx(ctx, "found newest replied post", "cid", nf.Cid)
+					slog.DebugContext(ctx, "found newest replied post", "cid", nf.Cid)
 					break OUTER
 				}
 
@@ -88,17 +88,17 @@ OUTER:
 
 					respList = append(respList, resp)
 				} else {
-					slog.DebugCtx(ctx, "no dice requests found", "text", v.Text)
+					slog.DebugContext(ctx, "no dice requests found", "text", v.Text)
 				}
 
 			case *bsky.FeedRepost:
-				slog.DebugCtx(ctx, "feed repost", "subjectCid", v.Subject.Cid, "subjectUri", v.Subject.Uri)
+				slog.DebugContext(ctx, "feed repost", "subjectCid", v.Subject.Cid, "subjectUri", v.Subject.Uri)
 			case *bsky.FeedLike:
-				slog.DebugCtx(ctx, "feed like", "subjectCid", v.Subject.Cid, "subjectUri", v.Subject.Uri)
+				slog.DebugContext(ctx, "feed like", "subjectCid", v.Subject.Cid, "subjectUri", v.Subject.Uri)
 			case *bsky.GraphFollow:
-				slog.DebugCtx(ctx, "graph follow", "subject", v.Subject)
+				slog.DebugContext(ctx, "graph follow", "subject", v.Subject)
 			default:
-				slog.WarnCtx(ctx, "unknown record type", "type", fmt.Sprintf("%T", v))
+				slog.WarnContext(ctx, "unknown record type", "type", fmt.Sprintf("%T", v))
 			}
 		}
 
@@ -110,18 +110,18 @@ OUTER:
 		break
 	}
 
-	slog.InfoCtx(ctx, "reply count", "count", len(respList))
+	slog.InfoContext(ctx, "reply count", "count", len(respList))
 
 	if unreadResp.Count != 0 {
 		err = bsky.NotificationUpdateSeen(ctx, xrpcc, &bsky.NotificationUpdateSeen_Input{
 			SeenAt: now.Format(time.RFC3339Nano),
 		})
 		if err != nil {
-			slog.ErrorCtx(ctx, "error raised by app.bsky.notification.updateSeen", "error", err)
+			slog.ErrorContext(ctx, "error raised by app.bsky.notification.updateSeen", "error", err)
 			return nil, err
 		}
 
-		slog.DebugCtx(ctx, "update notification seen", "now", now)
+		slog.DebugContext(ctx, "update notification seen", "now", now)
 	}
 
 	return respList, nil
