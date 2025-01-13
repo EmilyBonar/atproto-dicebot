@@ -11,7 +11,7 @@ import (
 	"golang.org/x/exp/slog"
 )
 
-func logError(ctx context.Context, errIn error) (err error) {
+func LogError(ctx context.Context, errIn error) (err error) {
 	if errIn != nil {
 		pc, _, _, ok := runtime.Caller(1)
 		details := runtime.FuncForPC(pc)
@@ -19,7 +19,7 @@ func logError(ctx context.Context, errIn error) (err error) {
 		if ok && details != nil {
 			callingFunc = fmt.Sprintf("called from %s", details.Name())
 		}
-		slog.ErrorContext(ctx, "error ", callingFunc, "msg: ", errIn)
+		slog.ErrorContext(ctx, "error ", callingFunc, slog.Any("error", errIn))
 		return fmt.Errorf("error %v msg: %v", callingFunc, errIn)
 	}
 	return nil
@@ -35,16 +35,13 @@ func getPassword() string {
 
 func LoadAuthInfo(ctx context.Context, xrpcc *xrpc.Client) (*xrpc.AuthInfo, error) {
 	auth, err := getAuthSession(ctx, xrpcc)
-	logError(ctx, err)
 
 	if auth == nil {
 		auth, err = refreshAuthSession(ctx, xrpcc)
-		logError(ctx, err)
 	}
 
 	if auth == nil {
 		auth, err = createAuthSession(ctx, xrpcc)
-		logError(ctx, err)
 	}
 
 	return auth, err
@@ -55,7 +52,7 @@ func getAuthSession(ctx context.Context, xrpcc *xrpc.Client) (*xrpc.AuthInfo, er
 	auth, err := comatproto.ServerGetSession(ctx, xrpcc)
 
 	if err != nil {
-		return nil, logError(ctx, fmt.Errorf("failed to get session: %w", err))
+		return nil, LogError(ctx, fmt.Errorf("failed to get session: %w", err))
 	}
 
 	return &xrpc.AuthInfo{
@@ -69,7 +66,7 @@ func refreshAuthSession(ctx context.Context, xrpcc *xrpc.Client) (*xrpc.AuthInfo
 	auth, err := comatproto.ServerRefreshSession(ctx, xrpcc)
 
 	if err != nil {
-		return nil, logError(ctx, fmt.Errorf("failed to refresh session: %w", err))
+		return nil, LogError(ctx, fmt.Errorf("failed to refresh session: %w", err))
 	}
 
 	return &xrpc.AuthInfo{
@@ -91,7 +88,7 @@ func createAuthSession(ctx context.Context, xrpcc *xrpc.Client) (*xrpc.AuthInfo,
 	})
 
 	if err != nil {
-		return nil, logError(ctx, fmt.Errorf("failed to create session: %w", err))
+		return nil, LogError(ctx, fmt.Errorf("failed to create session: %w", err))
 	}
 
 	return &xrpc.AuthInfo{

@@ -35,10 +35,7 @@ func DoesMentionMe(_ context.Context, me *xrpc.AuthInfo, post *bsky.FeedPost) bo
 }
 
 func HasAlreadyReplied(_ context.Context, me *xrpc.AuthInfo, thread *bsky.FeedGetPostThread_Output) bool {
-	if thread.Thread == nil {
-		return false
-	}
-	if thread.Thread.FeedDefs_ThreadViewPost == nil {
+	if thread.Thread == nil || thread.Thread.FeedDefs_ThreadViewPost == nil {
 		return false
 	}
 	for _, reply := range thread.Thread.FeedDefs_ThreadViewPost.Replies {
