@@ -34,15 +34,15 @@ func getPassword() string {
 }
 
 func LoadAuthInfo(ctx context.Context, xrpcc *xrpc.Client) (*xrpc.AuthInfo, error) {
-	auth, err := getAuthSession(ctx, xrpcc)
+	// auth, err := getAuthSession(ctx, xrpcc)
 
-	if auth == nil {
-		auth, err = refreshAuthSession(ctx, xrpcc)
-	}
+	// if auth == nil {
+	// 	auth, err = refreshAuthSession(ctx, xrpcc)
+	// }
 
-	if auth == nil {
-		auth, err = createAuthSession(ctx, xrpcc)
-	}
+	// if auth == nil {
+	auth, err := createAuthSession(ctx, xrpcc)
+	//}
 
 	return auth, err
 }
